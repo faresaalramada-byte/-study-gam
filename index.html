@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>لعبة الدراسة</title>
+
+  <style>
+
+    * {
+
+      box-sizing: border-box;
+
+      font-family: Arial, sans-serif;
+
+    }
+
+    body {
+
+      margin: 0;
+
+      min-height: 100vh;
+
+      background: linear-gradient(135deg, #667eea, #764ba2);
+
+      color: white;
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+      padding: 20px;
+
+    }
+
+    .game {
+
+      width: 100%;
+
+      max-width: 600px;
+
+      background: rgba(255,255,255,0.12);
+
+      backdrop-filter: blur(10px);
+
+      border-radius: 25px;
+
+      padding: 25px;
+
+      text-align: center;
+
+      box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+
+    }
+
+    h1 {
+
+      margin-top: 0;
+
+      font-size: 32px;
+
+    }
+
+    .stats {
+
+      display: flex;
+
+      justify-content: space-around;
+
+      margin: 20px 0;
+
+      gap: 10px;
+
+    }
+
+    .stat {
+
+      background: rgba(255,255,255,0.15);
+
+      padding: 15px;
+
+      border-radius: 15px;
+
+      flex: 1;
+
+    }
+
+    .question {
+
+      background: white;
+
+      color: #222;
+
+      padding: 25px;
+
+      border-radius: 20px;
+
+      margin: 20px 0;
+
+      font-size: 22px;
+
+      font-weight: bold;
+
+    }
+
+    .answers {
+
+      display: grid;
+
+      gap: 12px;
+
+    }
+
+    button {
+
+      border: none;
+
+      border-radius: 15px;
+
+      padding: 16px;
+
+      font-size: 18px;
+
+      cursor: pointer;
+
+      background: white;
+
+      color: #333;
+
+      transition: 0.2s;
+
+    }
+
+    button:hover {
+
+      transform: scale(1.03);
+
+    }
+
+    .correct {
+
+      background: #35d07f !important;
+
+      color: white !important;
+
+    }
+
+    .wrong {
+
+      background: #ff5252 !important;
+
+      color: white !important;
+
+    }
+
+    #next {
+
+      margin-top: 20px;
+
+      background: #ffd54f;
+
+      color: #222;
+
+      font-weight: bold;
+
+      display: none;
+
+      width: 100%;
+
+    }
+
+    .progress {
+
+      height: 10px;
+
+      background: rgba(255,255,255,0.2);
+
+      border-radius: 10px;
+
+      overflow: hidden;
+
+      margin-top: 15px;
+
+    }
+
+    .bar {
+
+      height: 100%;
+
+      width: 0%;
+
+      background: #ffd54f;
+
+      transition: 0.3s;
+
+    }
+
+    #result {
+
+      display: none;
+
+    }
+
+    .restart {
+
+      background: #ffd54f;
+
+      font-weight: bold;
+
+      width: 100%;
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="game">
+
+    <div id="gameScreen">
+
+      <h1>🎮 لعبة الدراسة</h1>
+
+      <p>اختبر معلوماتك واربح النقاط!</p>
+
+      <div class="stats">
+
+        <div class="stat">
+
+          ⭐ النقاط
+
+          <br>
+
+          <strong id="score">0</strong>
+
+        </div>
+
+        <div class="stat">
+
+          ❤️ الحياة
+
+          <br>
+
+          <strong id="lives">3</strong>
+
+        </div>
+
+        <div class="stat">
+
+          📚 السؤال
+
+          <br>
+
+          <strong><span id="number">1</span>/10</strong>
+
+        </div>
+
+      </div>
+
+      <div class="progress">
+
+        <div class="bar" id="bar"></div>
+
+      </div>
+
+      <div class="question" id="question">
+
+        السؤال هنا
+
+      </div>
+
+      <div class="answers" id="answers"></div>
+
+      <button id="next" onclick="nextQuestion()">
+
+        السؤال التالي ➡️
+
+      </button>
+
+    </div>
+
+    <div id="result">
+
+      <h1>🏆 انتهت اللعبة!</h1>
+
+      <div class="question">
+
+        🎉 نتيجتك:
+
+        <br><br>
+
+        <span id="finalScore">0</span> نقطة
+
+      </div>
+
+      <p id="message"></p>
+
+      <button class="restart" onclick="restartGame()">
+
+        🔄 العب مرة أخرى
+
+      </button>
+
+    </div>
+
+  </div>
+
+<script>
+
+const questions = [
+
+  {
+
+    question: "كم عدد أيام الأسبوع؟",
+
+    answers: ["5", "6", "7", "8"],
+
+    correct: 2
+
+  },
+
+  {
+
+    question: "ما عاصمة المملكة العربية السعودية؟",
+
+    answers: ["جدة", "الرياض", "مكة", "الدمام"],
+
+    correct: 1
+
+  },
+
+  {
+
+    question: "كم حاصل 5 × 6؟",
+
+    answers: ["20", "25", "30", "35"],
+
+    correct: 2
+
+  },
+
+  {
+
+    question: "ما الكوكب المعروف بالكوكب الأحمر؟",
+
+    answers: ["الأرض", "المريخ", "المشتري", "الزهرة"],
+
+    correct: 1
+
+  },
+
+  {
+
+    question: "كم عدد أشهر السنة؟",
+
+    answers: ["10", "11", "12", "13"],
+
+    correct: 2
+
+  },
+
+  {
+
+    question: "ما ناتج 100 ÷ 10؟",
+
+    answers: ["5", "10", "20", "50"],
+
+    correct: 1
+
+  },
+
+  {
+
+    question: "ما أكبر محيط في العالم؟",
+
+    answers: ["الأطلسي", "الهندي", "الهادئ", "المتجمد"],
+
+    correct: 2
+
+  },
+
+  {
+
+    question: "كم عدد حروف اللغة العربية؟",
+
+    answers: ["26", "28", "30", "32"],
+
+    correct: 1
+
+  },
+
+  {
+
+    question: "ما الحيوان الذي يُلقب بسفينة الصحراء؟",
+
+    answers: ["الحصان", "الجمل", "الفيل", "الأسد"],
+
+    correct: 1
+
+  },
+
+  {
+
+    question: "كم حاصل 9 + 8؟",
+
+    answers: ["15", "16", "17", "18"],
+
+    correct: 2
+
+  }
+
+];
+
+let current = 0;
+
+let score = 0;
+
+let lives = 3;
+
+let answered = false;
+
+function loadQuestion() {
+
+  answered = false;
+
+  const q = questions[current];
+
+  document.getElementById("question").textContent = q.question;
+
+  document.getElementById("number").textContent = current + 1;
+
+  document.getElementById("score").textContent = score;
+
+  document.getElementById("lives").textContent = lives;
+
+  document.getElementById("bar").style.width =
+
+    ((current) / questions.length * 100) + "%";
+
+  const answers = document.getElementById("answers");
+
+  answers.innerHTML = "";
+
+  q.answers.forEach((answer, index) => {
+
+    const button = document.createElement("button");
+
+    button.textContent = answer;
+
+    button.onclick = () => checkAnswer(button, index);
+
+    answers.appendChild(button);
+
+  });
+
+  document.getElementById("next").style.display = "none";
+
+}
+
+function checkAnswer(button, index) {
+
+  if (answered) return;
+
+  answered = true;
+
+  const correct = questions[current].correct;
+
+  const buttons = document.querySelectorAll(".answers button");
+
+  if (index === correct) {
+
+    button.classList.add("correct");
+
+    score += 10;
+
+    document.getElementById("score").textContent = score;
+
+  } else {
+
+    button.classList.add("wrong");
+
+    buttons[correct].classList.add("correct");
+
+    lives--;
+
+    document.getElementById("lives").textContent = lives;
+
+  }
+
+  document.getElementById("next").style.display = "block";
+
+}
+
+function nextQuestion() {
+
+  current++;
+
+  if (current >= questions.length || lives <= 0) {
+
+    showResult();
+
+  } else {
+
+    loadQuestion();
+
+  }
+
+}
+
+function showResult() {
+
+  document.getElementById("gameScreen").style.display = "none";
+
+  document.getElementById("result").style.display = "block";
+
+  document.getElementById("finalScore").textContent = score;
+
+  let message = "";
+
+  if (score >= 90) {
+
+    message = "🌟 ممتاز! أنت عبقري!";
+
+  } else if (score >= 70) {
+
+    message = "👏 أحسنت! نتيجة رائعة!";
+
+  } else if (score >= 50) {
+
+    message = "👍 جيد جدًا، استمر في التعلم!";
+
+  } else {
+
+    message = "💪 لا تستسلم، حاول مرة أخرى!";
+
+  }
+
+  document.getElement
