@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>لعبة الدراسة</title>
+
+  <style>
+
+    * {
+
+      box-sizing: border-box;
+
+      font-family: Arial, sans-serif;
+
+    }
+
+    body {
+
+      margin: 0;
+
+      min-height: 100vh;
+
+      background: linear-gradient(135deg, #667eea, #764ba2);
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+      padding: 20px;
+
+    }
+
+    .game {
+
+      width: 100%;
+
+      max-width: 600px;
+
+      background: white;
+
+      border-radius: 25px;
+
+      padding: 25px;
+
+      text-align: center;
+
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+
+    }
+
+    h1 {
+
+      margin-top: 0;
+
+      color: #5b45c5;
+
+      font-size: 32px;
+
+    }
+
+    .subtitle {
+
+      color: #666;
+
+      margin-bottom: 25px;
+
+    }
+
+    .stats {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      gap: 10px;
+
+      margin-bottom: 20px;
+
+    }
+
+    .stat {
+
+      flex: 1;
+
+      background: #f1efff;
+
+      padding: 12px;
+
+      border-radius: 15px;
+
+      font-weight: bold;
+
+    }
+
+    .question {
+
+      background: #f7f7f7;
+
+      border-radius: 18px;
+
+      padding: 25px 15px;
+
+      margin-bottom: 20px;
+
+      font-size: 23px;
+
+      font-weight: bold;
+
+    }
+
+    .answers {
+
+      display: grid;
+
+      grid-template-columns: 1fr 1fr;
+
+      gap: 12px;
+
+    }
+
+    button {
+
+      border: none;
+
+      border-radius: 15px;
+
+      padding: 16px;
+
+      font-size: 18px;
+
+      cursor: pointer;
+
+      transition: 0.2s;
+
+    }
+
+    .answer {
+
+      background: #eeeaff;
+
+      color: #333;
+
+    }
+
+    .answer:hover {
+
+      transform: scale(1.03);
+
+      background: #ddd6ff;
+
+    }
+
+    .correct {
+
+      background: #4caf50 !important;
+
+      color: white;
+
+    }
+
+    .wrong {
+
+      background: #f44336 !important;
+
+      color: white;
+
+    }
+
+    #message {
+
+      min-height: 30px;
+
+      margin: 20px 0 10px;
+
+      font-size: 19px;
+
+      font-weight: bold;
+
+    }
+
+    #next {
+
+      background: #5b45c5;
+
+      color: white;
+
+      width: 100%;
+
+      margin-top: 10px;
+
+      display: none;
+
+    }
+
+    #next:hover {
+
+      background: #4935ad;
+
+    }
+
+    .start {
+
+      background: #5b45c5;
+
+      color: white;
+
+      width: 100%;
+
+      margin-top: 10px;
+
+    }
+
+    .start:hover {
+
+      background: #4935ad;
+
+    }
+
+    .hidden {
+
+      display: none;
+
+    }
+
+    .result {
+
+      font-size: 24px;
+
+      font-weight: bold;
+
+      padding: 20px;
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<div class="game">
+
+  <h1>🎮 لعبة الدراسة</h1>
+
+  <div class="subtitle">اختبر معلوماتك واربح النقاط!</div>
+
+  <div class="stats">
+
+    <div class="stat">
+
+      ⭐ النقاط<br>
+
+      <span id="score">0</span>
+
+    </div>
+
+    <div class="stat">
+
+      📝 السؤال<br>
+
+      <span id="number">1</span>/10
+
+    </div>
+
+  </div>
+
+  <div id="gameArea">
+
+    <div class="question" id="question">
+
+      جاهز للبدء؟
+
+    </div>
+
+    <div class="answers" id="answers"></div>
+
+    <div id="message"></div>
+
+    <button id="next" onclick="nextQuestion()">
+
+      السؤال التالي ➡️
+
+    </button>
+
+  </div>
+
+  <div id="result" class="result hidden"></div>
+
+  <button class="start" id="start" onclick="startGame()">
+
+    🚀 ابدأ اللعبة
+
+  </button>
+
+</div>
+
+<script>
+
+const questions = [
+
+  {
+
+    question: "ما هي عاصمة المملكة العربية السعودية؟",
+
+    answers: ["الرياض", "جدة", "مكة", "الدمام"],
+
+    correct: "الرياض"
+
+  },
+
+  {
+
+    question: "كم عدد أيام الأسبوع؟",
+
+    answers: ["5", "6", "7", "8"],
+
+    correct: "7"
+
+  },
+
+  {
+
+    question: "ما هو الكوكب المعروف بالكوكب الأحمر؟",
+
+    answers: ["الأرض", "المريخ", "المشتري", "الزهرة"],
+
+    correct: "المريخ"
+
+  },
+
+  {
+
+    question: "كم يساوي 5 + 7؟",
+
+    answers: ["10", "11", "12", "13"],
+
+    correct: "12"
+
+  },
+
+  {
+
+    question: "ما هو أكبر محيط في العالم؟",
+
+    answers: ["المحيط الأطلسي", "المحيط الهندي", "المحيط الهادئ", "المحيط المتجمد"],
+
+    correct: "المحيط الهادئ"
+
+  },
+
+  {
+
+    question: "كم عدد ألوان قوس قزح؟",
+
+    answers: ["5", "6", "7", "8"],
+
+    correct: "7"
+
+  },
+
+  {
+
+    question: "ما هو ناتج 10 × 5؟",
+
+    answers: ["40", "50", "60", "70"],
+
+    correct: "50"
+
+  },
+
+  {
+
+    question: "أي حيوان يُعرف بأنه ملك الغابة؟",
+
+    answers: ["النمر", "الفيل", "الأسد", "الذئب"],
+
+    correct: "الأسد"
+
+  },
+
+  {
+
+    question: "ما هو أقرب كوكب إلى الشمس؟",
+
+    answers: ["الأرض", "عطارد", "المريخ", "زحل"],
+
+    correct: "عطارد"
+
+  },
+
+  {
+
+    question: "كم عدد حروف اللغة العربية؟",
+
+    answers: ["26", "27", "28", "29"],
+
+    correct: "28"
+
+  }
+
+];
+
+let current = 0;
+
+let score = 0;
+
+let answered = false;
+
+function startGame() {
+
+  current = 0;
+
+  score = 0;
+
+  answered = false;
+
+  document.getElementById("score").textContent = score;
+
+  document.getElementById("start").style.display = "none";
+
+  document.getElementById("result").classList.add("hidden");
+
+  document.getElementById("gameArea").classList.remove("hidden");
+
+  showQuestion();
+
+}
+
+function showQuestion() {
+
+  answered = false;
+
+  const q = questions[current];
+
+  document.getElementById("question").textContent = q.question;
+
+  document.getElementById("number").textContent = current + 1;
+
+  document.getElementById("message").textContent = "";
+
+  const answersDiv = document.getElementById("answers");
+
+  answersDiv.innerHTML = "";
+
+  document.getElementById("next").style.display = "none";
+
+  q.answers.forEach(answer => {
+
+    const button = document.createElement("button");
+
+    button.textContent = answer;
+
+    button.className = "answer";
+
+    button.onclick = function() {
+
+      checkAnswer(button, answer);
+
+    };
+
+    answersDiv.appendChild(button);
+
+  });
+
+}
+
+function checkAnswer(button, answer) {
+
+  if (answered) return;
+
+  answered = true;
+
+  const correct = questions[current].correct;
+
+  const buttons = document.querySelectorAll(".answer");
+
+  buttons.forEach(btn => {
+
+    btn.disabled = true;
+
+    if (btn.textContent === correct) {
+
+      btn.classList.add("correct");
+
+    }
+
+  });
+
+  if (answer === correct) {
+
+    score += 10;
+
+    document.getElementById("score").textContent = score;
+
+    document.getElementById("message").textContent = "🎉 إجابة صحيحة! +10 نقاط";
+
+    button.classList.add("correct");
+
+  } else {
+
+    document.getElementById("message").textContent =
+
+      "❌ إجابة خاطئة! الإجابة الصحيحة: " + correct;
+
+    button.classList.add("wrong");
+
+  }
+
+  document.getElementById("next").style.display = "block";
+
+}
+
+function nextQuestion() {
+
+  current++;
+
+  if (current >= questions.length) {
+
+    finishGame();
+
+  } else {
+
+    showQuestion();
+
+  }
+
+}
+
+function finishGame() {
+
+  document.getElementById("gameArea").classList.add("hidden");
+
+  const result = document.getElementById("result");
+
+  result.classList.remove("hidden");
+
+  result.innerHTML =
+
+    "🏆 انتهت اللعبة!<br><br>" +
+
+    "نتيجتك: " + score + " من " + (questions.length * 10) +
+
+    "<br><br>" +
+
+    "أحسنت! 👏";
+
+  document.getElementById("start").textContent = "🔄 العب مرة أخرى";
+
+  document.getElementById("start").style.display = "block";
+
+}
+
+</script>
+
+</body>
+
+</html>
